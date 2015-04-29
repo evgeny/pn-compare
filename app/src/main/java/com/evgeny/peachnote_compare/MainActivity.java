@@ -37,9 +37,10 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
     private Gson gson = new Gson();
 
     /**
-     * map scoreid
+     * map videoid to [segment][velocity]
+     * TODO may be map alignment to [segment][velocity] would be better
      */
-    private Map<String, double[]> velocities;
+    private Map<String, double[][]> velocities;
 
 
     @Override
@@ -94,9 +95,8 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(Loader<Void> loader) {
-
+        //do nothing here
     }
-
 
     /**
      * Calculate segments velocity of each video record
@@ -108,16 +108,20 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
         for (String scoreSyncPair : scoreSyncPairs) {
             Alignment alignment = alignments.get(scoreSyncPair);
 
+            double[][] segmentVelocityMap = new double[alignment.localTimeMaps.length][];
             for (int segment = 0; segment < alignment.localTimeMaps.length; segment++) {
                 double[][] segmentTimeMap = alignment.localTimeMaps[segment];
+
                 System.out.println("segment time map = " + segmentTimeMap.length);
                 if (segmentTimeMap[0].length < 2) continue;
 
                 ArrayList<double[]> av = updateBinVelocities(segmentTimeMap);
                 double[] binV = averageBinVelocities(av);
                 System.out.println("binV=" + Arrays.toString(binV));
-                velocities.put(alignment.uri1, binV);
+                segmentVelocityMap[segment] = binV;
             }
+
+            velocities.put(alignment.uri1, segmentVelocityMap);
         }
     }
 
@@ -182,6 +186,20 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
 
         return binV;
     }
+
+//    private double[] getGradientValues(double[] tickVelocities) {
+////        var tick, gradientValues = [], value, currentVel;
+//        double currentVel;
+//        for (double tick : tickVelocities) {
+//            if (tickVelocities.hasOwnProperty(tick)) {
+//                currentVel = tickVelocities[tick];
+//                value = (Math.atan(currentVel)/(Math.PI/2)) * 0.5;
+//                gradientValues.push(value);
+//            }
+//        }
+//
+//        return gradientValues;
+//    }
 
 //    private void createVideoSegment(double[][] segmentTimeMap, String videoID, String segmentId) {//, _conf) {
 //        double[] scoreTimeAxis = segmentTimeMap[0];
