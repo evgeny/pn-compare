@@ -89,6 +89,7 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<Void> loader, Void data) {
         calculateSegmentVelocity();
+        createAlignmentSegmentRepresentation();
         CompareView compareView = (CompareView) findViewById(R.id.compare_view);
         compareView.setAlignments(alignments.get(scoreSyncPairs[0]));
     }
@@ -187,41 +188,26 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
         return binV;
     }
 
-//    private double[] getGradientValues(double[] tickVelocities) {
-////        var tick, gradientValues = [], value, currentVel;
-//        double currentVel;
-//        for (double tick : tickVelocities) {
-//            if (tickVelocities.hasOwnProperty(tick)) {
-//                currentVel = tickVelocities[tick];
-//                value = (Math.atan(currentVel)/(Math.PI/2)) * 0.5;
-//                gradientValues.push(value);
-//            }
-//        }
-//
-//        return gradientValues;
-//    }
+    private double[] getGradientValues(double[] tickVelocities) {
+        double currentVel;
+        double[] gradientValues = new double[tickVelocities.length];
+        for (int tick = 0; tick < tickVelocities.length; tick++) {
+            currentVel = tickVelocities[tick];
+            gradientValues[tick] = (Math.atan(currentVel)/(Math.PI/2)) * 0.5;
+        }
 
-//    private void createVideoSegment(double[][] segmentTimeMap, String videoID, String segmentId) {//, _conf) {
-//        double[] scoreTimeAxis = segmentTimeMap[0];
-//        double[] videoSegmentAxis = segmentTimeMap[1];
-//        Rect newRectangle = new Rect();
-////        currentAvgVelInd, firstInd, secondInd, tpInd, velocity, indVel = [], sectionLength;
-//
-//        if (G.maxPlotX < scoreTimeAxis[scoreTimeAxis.length - 1]) {
-//            G.maxPlotX = scoreTimeAxis[scoreTimeAxis.length - 1];
-//        }
-//
-//        newRectangle.left = scoreTimeAxis[0];
-//        newRectangle.right = scoreTimeAxis[scoreTimeAxis.length - 1];
-////        newRectangle.width = scoreTimeAxis[scoreTimeAxis.length - 1] - scoreTimeAxis[0];
-//        newRectangle.x1_notbasis = videoSegmentAxis[0];
-//        newRectangle.segmentConfidence = _conf;
-//        newRectangle.videoID = videoID;
-//        newRectangle.segmentId = segmentId;
-//        newRectangle.timeMap = segmentTimeMap;
-//
-//        return newRectangle;
-//    }
+        return gradientValues;
+    }
+
+    public void createAlignmentSegmentRepresentation() {
+        for (Map.Entry<String, double[][]> entry : velocities.entrySet()) {
+            System.out.println("compute gradient for video id=" + entry.getKey());
+            for (double[] segment : entry.getValue()) {
+                double[] gradients = getGradientValues(segment);
+                System.out.println("gradients are=" + Arrays.toString(gradients));
+            }
+        }
+    }
 
     public static class Alignment {
         String uri0;

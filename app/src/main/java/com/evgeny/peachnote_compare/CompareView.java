@@ -4,15 +4,18 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Arrays;
 
 
 /**
@@ -99,7 +102,7 @@ public class CompareView extends View {
 
     private void invalidateSegments() {
         System.out.println("invalidateSegments()");
-        mSegmentPaint.setColor(Color.CYAN);
+//        mSegmentPaint.setColor(Color.CYAN);
         mRow = new ArrayList<>();
 
         if (alignment == null) return;
@@ -108,8 +111,20 @@ public class CompareView extends View {
         double[] scoreTimeAxis = alignment.localTimeMaps[0][0];
         double[] videoSegmentAxis = alignment.localTimeMaps[0][1];
 
-        Rect rect = new Rect((int) videoSegmentAxis[0], 10, (int) videoSegmentAxis[videoSegmentAxis.length - 1], 50);
+        Rect rect = new Rect((int) videoSegmentAxis[0], 50, (int) videoSegmentAxis[videoSegmentAxis.length - 1], 150);
         mRow.add(rect);
+
+        float points[] = new float[videoSegmentAxis.length];
+        for (int i = 0; i < videoSegmentAxis.length; i++) {
+            points[i] = (float) videoSegmentAxis[i];
+        }
+        System.out.println("videoSegmentAxis= " + Arrays.toString(videoSegmentAxis));
+        Shader shader = new LinearGradient(0, 0, 0, 100, getGradientColors(points.length), points, Shader.TileMode.MIRROR);
+        Matrix matrix = new Matrix();
+        matrix.setRotate(90);
+        shader.setLocalMatrix(matrix);
+
+        mSegmentPaint.setShader(shader);
 
 //        Rect newRectangle = new Rect(10, 10, 50, 50);
 //        mRow.add(newRectangle);
@@ -146,11 +161,24 @@ public class CompareView extends View {
             mExampleDrawable.draw(canvas);
         }
 
-        System.out.println("onDraw");
+//        System.out.println("onDraw");
         for(Rect rect : mRow) {
-            System.out.println("draw rect of size=" + rect.left + ", " + rect.right);
+//            System.out.println("draw rect of size=" + rect.left + ", " + rect.right);
             canvas.drawRect(rect, mSegmentPaint);
         }
+    }
+
+    private int[] getGradientColors(int length) {
+        int[] colors = new int[length];
+        int color1 = getResources().getColor(android.R.color.holo_red_light);
+        int color2 = getResources().getColor(android.R.color.holo_green_dark);
+        for (int i=0; i<length; i+=2) {
+            colors[i] = color1;
+            colors[i+1] = color2;
+        }
+
+        System.out.println("getGradientColors()=" + Arrays.toString(colors));
+        return colors;
     }
 
     /**
