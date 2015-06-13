@@ -2,6 +2,7 @@ package com.evgeny.peachnote_compare;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -36,6 +37,7 @@ public class CompareView extends View {
 
 //    Map<String, MainActivity.Alignment> alignments;
     MainActivity.Alignment alignment;
+    private Bitmap bitmap;
 
     public CompareView(Context context) {
         super(context);
@@ -119,12 +121,20 @@ public class CompareView extends View {
             points[i] = (float) videoSegmentAxis[i];
         }
         System.out.println("videoSegmentAxis= " + Arrays.toString(videoSegmentAxis));
-        Shader shader = new LinearGradient(0, 0, 0, 100, getGradientColors(points.length), points, Shader.TileMode.MIRROR);
-        Matrix matrix = new Matrix();
-        matrix.setRotate(90);
-        shader.setLocalMatrix(matrix);
+//        Shader shader = new LinearGradient(0, 0, 0, 100, getGradientColors(points.length), points, Shader.TileMode.MIRROR);
+//        Matrix matrix = new Matrix();
+//        matrix.setRotate(90);
+//        shader.setLocalMatrix(matrix);
+//
+//        mSegmentPaint.setShader(shader);
 
-        mSegmentPaint.setShader(shader);
+        int width = 100;
+        int[] colors = getGradientColors(points.length);
+        int cc[] = new int[width * colors.length];
+        for (int i=0; i<width; i++) {
+            System.arraycopy(colors,0, cc,i*width, colors.length);
+        }
+        bitmap = Bitmap.createBitmap(cc, points.length, width, Bitmap.Config.ARGB_8888);
 
 //        Rect newRectangle = new Rect(10, 10, 50, 50);
 //        mRow.add(newRectangle);
@@ -140,32 +150,34 @@ public class CompareView extends View {
 
         // TODO: consider storing these as member variables to reduce
         // allocations per draw cycle.
-        int paddingLeft = getPaddingLeft();
-        int paddingTop = getPaddingTop();
-        int paddingRight = getPaddingRight();
-        int paddingBottom = getPaddingBottom();
-
-        int contentWidth = getWidth() - paddingLeft - paddingRight;
-        int contentHeight = getHeight() - paddingTop - paddingBottom;
-
-        // Draw the text.
-        canvas.drawText(mExampleString,
-                paddingLeft + (contentWidth - mTextWidth) / 2,
-                paddingTop + (contentHeight + mTextHeight) / 2,
-                mTextPaint);
-
-        // Draw the example drawable on top of the text.
-        if (mExampleDrawable != null) {
-            mExampleDrawable.setBounds(paddingLeft, paddingTop,
-                    paddingLeft + contentWidth, paddingTop + contentHeight);
-            mExampleDrawable.draw(canvas);
-        }
+//        int paddingLeft = getPaddingLeft();
+//        int paddingTop = getPaddingTop();
+//        int paddingRight = getPaddingRight();
+//        int paddingBottom = getPaddingBottom();
+//
+//        int contentWidth = getWidth() - paddingLeft - paddingRight;
+//        int contentHeight = getHeight() - paddingTop - paddingBottom;
+//
+//        // Draw the text.
+//        canvas.drawText(mExampleString,
+//                paddingLeft + (contentWidth - mTextWidth) / 2,
+//                paddingTop + (contentHeight + mTextHeight) / 2,
+//                mTextPaint);
+//
+//        // Draw the example drawable on top of the text.
+//        if (mExampleDrawable != null) {
+//            mExampleDrawable.setBounds(paddingLeft, paddingTop,
+//                    paddingLeft + contentWidth, paddingTop + contentHeight);
+//            mExampleDrawable.draw(canvas);
+//        }
 
 //        System.out.println("onDraw");
-        for(Rect rect : mRow) {
+//        for(Rect rect : mRow) {
 //            System.out.println("draw rect of size=" + rect.left + ", " + rect.right);
-            canvas.drawRect(rect, mSegmentPaint);
-        }
+//            canvas.drawRect(rect, mSegmentPaint);
+//        }
+
+        if (bitmap != null) canvas.drawBitmap(bitmap, 0, 0, mSegmentPaint);
     }
 
     private int[] getGradientColors(int length) {
@@ -204,64 +216,5 @@ public class CompareView extends View {
     public void setAlignments(MainActivity.Alignment alignment) {
         this.alignment = alignment;
         invalidateSegments();
-    }
-
-    /**
-     * Gets the example color attribute value.
-     *
-     * @return The example color attribute value.
-     */
-    public int getExampleColor() {
-        return mExampleColor;
-    }
-
-    /**
-     * Sets the view's example color attribute value. In the example view, this color
-     * is the font color.
-     *
-     * @param exampleColor The example color attribute value to use.
-     */
-    public void setExampleColor(int exampleColor) {
-        mExampleColor = exampleColor;
-        invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the example dimension attribute value.
-     *
-     * @return The example dimension attribute value.
-     */
-    public float getExampleDimension() {
-        return mExampleDimension;
-    }
-
-    /**
-     * Sets the view's example dimension attribute value. In the example view, this dimension
-     * is the font size.
-     *
-     * @param exampleDimension The example dimension attribute value to use.
-     */
-    public void setExampleDimension(float exampleDimension) {
-        mExampleDimension = exampleDimension;
-        invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the example drawable attribute value.
-     *
-     * @return The example drawable attribute value.
-     */
-    public Drawable getExampleDrawable() {
-        return mExampleDrawable;
-    }
-
-    /**
-     * Sets the view's example drawable attribute value. In the example view, this drawable is
-     * drawn above the text.
-     *
-     * @param exampleDrawable The example drawable attribute value to use.
-     */
-    public void setExampleDrawable(Drawable exampleDrawable) {
-        mExampleDrawable = exampleDrawable;
     }
 }
