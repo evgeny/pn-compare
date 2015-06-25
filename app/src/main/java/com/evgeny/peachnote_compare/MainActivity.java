@@ -5,6 +5,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 
 public class MainActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Void> {
+    private static final String TAG = "MainActivity";
     private final String alignUrl = "http://alignment-demo.s3.amazonaws.com/IMSLP-YT-AlignmentQuality.json";
 
 
@@ -61,6 +63,7 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
     private void fetchAlignmentData(String scoreId, String videoId, String jsonPath, int counter) {
         final OkHttpClient httpClient = new OkHttpClient();
         for (String scoreSyncPair : scoreSyncPairs) {
+            Log.d(TAG, "fetchAlignmentData(): score=" + scoreSyncPair);
             Request request = new Request.Builder()
                     .url(scoreSyncPair)
                     .build();
@@ -89,8 +92,9 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<Void> loader, Void data) {
         calculateSegmentVelocity();
-        createAlignmentSegmentRepresentation();
+        Map<String, double[][]> gradientMapping = createAlignmentSegmentRepresentation();
         CompareView compareView = (CompareView) findViewById(R.id.compare_view);
+        compareView.setGradients(gradientMapping);
         compareView.setAlignments(alignments.get(scoreSyncPairs[0]));
     }
 
@@ -199,14 +203,21 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
         return gradientValues;
     }
 
-    public void createAlignmentSegmentRepresentation() {
+    public Map<String, double[][]> createAlignmentSegmentRepresentation() {
+        Map<String, double[][]> y = Maps.newHashMap();
         for (Map.Entry<String, double[][]> entry : velocities.entrySet()) {
             System.out.println("compute gradient for video id=" + entry.getKey());
-            for (double[] segment : entry.getValue()) {
-                double[] gradients = getGradientValues(segment);
-                System.out.println("gradients are=" + Arrays.toString(gradients));
+            double[][] x = new double[entry.getValue().length][];
+            for (int i = 0; i < entry.getValue().length; i++) {
+                double[] segment = entry.getValue()[i];
+                x[i] = getGradientValues(segment);
+                System.out.println("gradients are=" + Arrays.toString(x[i]));
             }
+
+            y.put(entry.getKey(), x);
         }
+
+        return y;
     }
 
     public static class Alignment {
