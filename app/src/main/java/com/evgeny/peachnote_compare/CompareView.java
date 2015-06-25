@@ -82,13 +82,24 @@ public class CompareView extends View {
 //
 //        mSegmentPaint.setShader(shader);
 
-        int width = 100;
+        //segment bat height
+        int height = 100;
+
+        //orignial line
         int[] colors = getGradientColors();
-        int cc[] = new int[width * colors.length];
-        for (int i = 0; i < width; i++) {
-            System.arraycopy(colors, 0, cc, i * width, colors.length);
+
+        // bar bitmap array
+        int cc[] = new int[height * colors.length];
+
+        /**
+         * make the bar the {@link height} px height by copying the original line {@link height} times
+         */
+        for (int i = 0; i < height; i++) {
+            System.arraycopy(colors, 0, cc, i * colors.length, colors.length);
         }
-        bitmap = Bitmap.createBitmap(cc, colors.length, width, Bitmap.Config.ARGB_8888);
+
+        // create bitmap
+        bitmap = Bitmap.createBitmap(cc, colors.length, height, Bitmap.Config.ARGB_8888);
 
 //        Rect newRectangle = new Rect(10, 10, 50, 50);
 //        mRow.add(newRectangle);
